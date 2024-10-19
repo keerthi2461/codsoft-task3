@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #939797;
+      font-family: 'Roboto', sans-serif;
+    }
+    .calculator {
+      width: 320px;
+      background-color: #c4bbbb;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    .display {
+      background-color: #212121;
+      color: #e0f7fa;
+      font-size: 2.5em;
+      text-align: right;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 15px;
+    }
+    .btn {
+      padding: 20px;
+      font-size: 1.5em;
+      background-color: #363838;
+      color: white;
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn:hover {
+      background-color: #c5bbb1;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+    }
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .btn.operator {
+      background-color: #ff7043;
+    }
+    .btn.operator:hover {
+      background-color: #ee734e;
+    }
+    .btn.clear {
+      background-color: #ff7043;
+      grid-column: span 2;
+    }
+    .btn.delete {
+      background-color: #ff7043;
+      color: #ffffff;
+      grid-column: span 2;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div id="display" class="display">0</div>
+    <div class="buttons">
+      <button class="btn" data-value="7">7</button>
+      <button class="btn" data-value="8">8</button>
+      <button class="btn" data-value="9">9</button>
+      <button class="btn operator" data-value="/">÷</button>
+      <button class="btn" data-value="4">4</button>
+      <button class="btn" data-value="5">5</button>
+      <button class="btn" data-value="6">6</button>
+      <button class="btn operator" data-value="*">×</button>
+      <button class="btn" data-value="1">1</button>
+      <button class="btn" data-value="2">2</button>
+      <button class="btn" data-value="3">3</button>
+      <button class="btn operator" data-value="-">−</button>
+      <button class="btn" data-value="0">0</button>
+      <button class="btn" data-value=".">.</button>
+      <button class="btn operator" data-value="=">=</button>
+      <button class="btn operator" data-value="+">+</button>
+      <button class="btn clear" data-value="clear">C</button>
+      <button class="btn delete" data-value="delete">DEL</button>
+    </div>
+  </div>
+  <script>
+    const display = document.getElementById('display');
+    let currentValue = '';
+    let operator = '';
+    let previousValue = '';
+    let expression = '';
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        const value = button.getAttribute('data-value');
+        if (value === 'clear') {
+          clearCalculator();
+        } else if (value === 'delete') {
+          deleteLast();
+        } else if (value === '=') {
+          calculate();
+        } else if (isOperator(value)) {
+          setOperator(value);
+        } else {
+          appendNumber(value);
+        }
+      });
+    });
+    function appendNumber(number) {
+      if (currentValue === '' && number !== '.') {
+        currentValue = number;
+      } else if (number === '.' && currentValue.includes('.')) {
+        return;
+      } else {
+        currentValue += number;
+      }
+      expression += number;
+      updateDisplay(expression);
+    }
+    function setOperator(op) {
+      if (operator) calculate();  
+      operator = op;
+      previousValue = currentValue;
+      currentValue = '';
+      expression += ` ${op} `;
+      updateDisplay(expression);
+    }
+    function calculate() {
+      let result;
+      const prev = parseFloat(previousValue);
+      const current = parseFloat(currentValue);
+      if (isNaN(prev) || isNaN(current)) return;
+      switch (operator) {
+        case '+':
+          result = prev + current;
+          break;
+        case '-':
+          result = prev - current;
+          break;
+        case '*':
+          result = prev * current;
+          break;
+        case '/':
+          result = current === 0 ? 'Error' : prev / current;
+          break;
+        default:
+          return;
+      }
+      currentValue = result.toString();
+      operator = '';
+      previousValue = '';
+      expression = result.toString();
+      updateDisplay(expression);
+    }
+    function clearCalculator() {
+      currentValue = '';
+      operator = '';
+      previousValue = '';
+      expression = '0';
+      updateDisplay(expression);
+    }
+    function deleteLast() {
+      expression = expression.slice(0, -1);
+      if (isOperator(expression.slice(-1))) {
+        expression = expression.slice(0, -1);
+      }
+      currentValue = currentValue.slice(0, -1);
+      if (currentValue === '') currentValue = '0';
+      updateDisplay(expression || '0');
+    }
+    function updateDisplay(value) {
+      display.textContent = value;
+    }
+    function isOperator(value) {
+      return ['+', '-', '*', '/'].includes(value);
+    }
+  </script>
+</body>
+</html>
